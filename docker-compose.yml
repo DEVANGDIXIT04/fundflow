@@ -1,4 +1,24 @@
 services:
+  app:
+    build: .
+    image: fundflow:local
+    container_name: fundflow-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-fundflow}
+      DB_USERNAME: ${POSTGRES_USER:-fundflow}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-fundflow}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 40s
+
   db:
     image: postgres:16-alpine
     container_name: fundflow-db
