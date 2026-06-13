@@ -1,2 +1,4 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+# Shell scripts run on Linux (EC2) — force LF so they never get a CR appended.
+*.sh text eol=lf
