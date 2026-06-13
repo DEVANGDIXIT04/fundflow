@@ -66,6 +66,25 @@ pipeline {
                 '''
             }
         }
+
+        stage('Deploy to EC2') {
+            // Needs AWS_ACCOUNT_ID and EC2_HOST as Jenkins global env vars,
+            // plus the credentials below. Skipped until all are configured.
+            when {
+                expression { return env.AWS_ACCOUNT_ID?.trim() && env.EC2_HOST?.trim() }
+            }
+            environment {
+                AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+                AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+                SSH_KEY_PATH          = credentials('ec2-ssh-key')      // kind: Secret file (.pem)
+                DB_URL                = credentials('rds-db-url')       // kind: Secret text
+                DB_USERNAME           = credentials('rds-db-username')  // kind: Secret text
+                DB_PASSWORD           = credentials('rds-db-password')  // kind: Secret text
+            }
+            steps {
+                sh 'chmod +x scripts/deploy.sh && ./scripts/deploy.sh ${GIT_SHA}'
+            }
+        }
     }
 
     post {
